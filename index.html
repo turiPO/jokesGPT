@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jokes Chatbot</title>
+    <style>
+        /* CSS styles for the chat window */
+        .chat-window {
+            width: 400px;
+            height: 500px;
+            border: 1px solid #ccc;
+            margin: 20px auto;
+            padding: 10px;
+            overflow-y: scroll;
+        }
+
+        .message {
+            margin-bottom: 10px;
+        }
+
+        .system-message {
+            color: blue;
+        }
+
+        .user-message {
+            color: green;
+        }
+
+        .bot-message {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-window" id="chat-window">
+    </div>
+    <input type="text" id="user-message" placeholder="Enter your message" onkeydown="sendMessage(event)">
+    <script>
+        // JavaScript code for handling the chat functionality
+        const chatWindow = document.getElementById("chat-window");
+        const userMessageInput = document.getElementById("user-message");
+
+        function appendMessage(role, content) {
+            const messageElement = document.createElement("div");
+            messageElement.classList.add("message");
+            messageElement.classList.add(`${role}-message`);
+            messageElement.innerText = content;
+            chatWindow.appendChild(messageElement);
+            chatWindow.scrollTop = chatWindow.scrollHeight;
+        }
+
+        function sendMessage(event) {
+            if (event.keyCode === 13) {
+                const userMessage = userMessageInput.value;
+                if (userMessage.trim() !== "") {
+                    appendMessage("user", userMessage);
+                    userMessageInput.value = "";
+
+                    fetch("/chat", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ "message": userMessage })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const botResponse = data.response;
+                        appendMessage("bot", botResponse);
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+                }
+            }
+        }
+    </script>
+</body>
+</html>
